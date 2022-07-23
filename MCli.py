@@ -53,28 +53,6 @@ def uinput():
 	else:
 		Mainlist()
 
-def executor():
-	with Manager() as manager:
-		global Resultee, Faily
-		num_cpus = cpu_count()
-		processes = []
-		Resultee = manager.list()
-		Faily = manager.list()
-		for process_num in range(num_cpus):
-			section = IDlist[process_num::num_cpus]
-			p = Process(target=MCli, args=(section,))
-			p.start()
-			processes.append(p)
-		for p in processes:
-			p.join()
-		Resultee = list(Resultee)
-		Faily = list(Faily)
-		print("")
-		print(" Failed Result : "  + colors.RED_BG + " "+str(len(Faily)) +" "+ colors.ENDC )
-		print(" Successfull Result : " + colors.GREEN_BG + " "+str(len(Resultee))+ " "+colors.ENDC)
-		pathlist = Path("output").rglob("*.json")
-		for path in pathlist:
-	
 def filet():
 	global IDlist, fileselector
 	num_file = 1
@@ -124,6 +102,26 @@ def filet():
 	print("")
 	return
 
+def executor():
+	with Manager() as manager:
+		global Resultee, Faily
+		num_cpus = cpu_count()
+		processes = []
+		Resultee = manager.list()
+		Faily = manager.list()
+		for process_num in range(num_cpus):
+			section = IDlist[process_num::num_cpus]
+			p = Process(target=MCli, args=(section,))
+			p.start()
+			processes.append(p)
+		for p in processes:
+			p.join()
+		Resultee = list(Resultee)
+		Faily = list(Faily)
+		print("")
+		print(" Failed Result : "  + colors.RED_BG + " "+str(len(Faily)) +" "+ colors.ENDC )
+		print(" Successfull Result : " + colors.GREEN_BG + " "+str(len(Resultee))+ " "+colors.ENDC)
+
 def MCli(IDlist):
 	for UUID in IDlist:
 		try:
@@ -131,8 +129,11 @@ def MCli(IDlist):
 			if r.status_code == expected_response:
 				print(" ["+colors.GREEN_BG+" HIT "+colors.ENDC+"] " + UUID)
 				print(UUID, file=open(f"output/success.txt", "a"))
-				with open('output/help.json', 'w') as f:
+				with open(f'output/{UUID}.json', 'w') as f:
 					json.dump(r.json(), f, indent = 4)
+				r = response.json()["data"]["Item"]["Contents"]
+				for i in r:
+					print(i["Url"], file=open(f"output/success-url.txt", "a"))
 				Resultee.append(str(UUID))
 			elif r.status_code != expected_response:
 				print(" ["+colors.RED_BG+" FAIL "+colors.ENDC+"] " + UUID + " [" +colors.RED_BG+" " + str(r.status_code) + " "+colors.ENDC+"]")
@@ -174,7 +175,7 @@ def Mainlist():
      \__\/
 
 	''')
-	print("    [" + colors.RED_BG + " Domain : Fronting " + colors.ENDC + "]")
+	print("    [" + colors.RED_BG + " MarketPlace : Extractor " + colors.ENDC + "]")
 	print("     ["+colors.RED_BG+" Author " + colors.ENDC + ":" + colors.GREEN_BG + " Kiynox " + colors.ENDC + "]")
 	print("")
 
@@ -199,7 +200,11 @@ def Mainlist():
 
 if __name__ == '__main__':
 	os.chdir(dirname(abspath(__file__)))
-	if not os.path.exists("input", "output"):
-		os.makedirs("input", "output")
+	if not os.path.exists("input"):
+		os.makedirs("input")
+	if not os.path.exists("output"):
+		os.makedirs("output")
+	if not os.path.exists("output/metadata"):
+		os.makedirs("output/metadata")
 	Mainlist()
     
