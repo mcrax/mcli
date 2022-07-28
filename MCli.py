@@ -131,54 +131,11 @@ def executor(switch):
 def Gettor(IDlist):
 	for UUID in IDlist:
 		try:
-			r = requests.post(playfabapi, headers=headers, json={'ItemId':UUID}, allow_redirects=False)
+			r = requests.post(UUID, headers={'User-Agent': 'cpprestsdk/2.9.0'}, allow_redirects=False)
 			if r.status_code == expected_response:
 				print(' ['+colors.GREEN_BG+' HIT '+colors.ENDC+'] ' + UUID)
-				print(UUID, file=open(f'output/success.txt', 'a'))
-				with open(f'output/metadata/{UUID}.json', 'w') as f:
-					json.dump(r.json(), f, indent = 4)
-					r = r.json()['data']['Item']['Contents']
-					for i in r:
-						print(i['Url'], file=open(f'output/success-url.txt', 'a'))
-						print(i['Url'], f)
-				Resultee.append(str(UUID))
-			elif r.status_code != expected_response:
-				print(' ['+colors.RED_BG+' FAIL '+colors.ENDC+'] ' + UUID + ' [' +colors.RED_BG+' ' + str(r.status_code) + ' '+colors.ENDC+']')
-				print(UUID, file=open(f'output/failed.txt', 'a'))
-				Faily.append(str(UUID))
-		except (Timeout, ReadTimeout, ConnectionError):
-			print(' ['+colors.RED_BG+' FAIL '+colors.ENDC+'] ' + UUID + ' [' + colors.RED_BG +' TIMEOUT '+colors.ENDC+']')
-			print(UUID, file=open(f'output/failed-.txt', 'a'))
-			Faily.append(str(UUID))
-			pass
-		except(ChunkedEncodingError):
-			print(' ['+colors.RED_BG+' FAIL '+colors.ENDC+'] ' + UUID + ' [' + colors.RED_BG+' Invalid Length '+colors.ENDC + ']')
-			print(UUID, file=open(f'output/failed.txt', 'a'))
-			Faily.append(str(UUID))
-			pass
-		except(TooManyRedirects):
-			print(' ['+colors.RED_BG+' FAIL '+colors.ENDC+'] ' + UUID + ' [' +colors.RED_BG+' Redirects Loop '+colors.ENDC+']')
-			print(UUID, file=open(f'output/failed.txt', 'a'))
-			Faily.append(str(UUID))
-			pass
-		except(InvalidURL):
-			print(' ['+colors.RED_BG+' FAIL '+colors.ENDC+'] ' + UUID + ' [' +colors.RED_BG+' Invalid URL '+colors.ENDC+']')
-			print(UUID, file=open(f'output/failed.txt', 'a'))
-			Faily.append(str(UUID))
-			pass
-	
-def Meta(IDlist):
-	for UUID in IDlist:
-		try:
-			r = requests.post(playfabapi, headers=headers, json={'ItemId':UUID}, allow_redirects=False)
-			if r.status_code == expected_response:
-				print(' ['+colors.GREEN_BG+' HIT '+colors.ENDC+'] ' + UUID)
-				datas = r.json()["data"]["Item"]["Contents"]
-				print(UUID, file=open(f'output/Metahit.txt', 'a'))
-				with open(f'output/metadata/{UUID}.txt', 'w') as f:
-					json.dump(r.json(), f, indent = 4)
-					for i in datas:
-						print("\n\n" + i["Url"], file=f)
+				with open(f'output/assets/{UUID}.txt', 'a') as f:
+					f.write(r.content)
 				Resultee.append(str(UUID))
 			elif r.status_code != expected_response:
 				print(' ['+colors.RED_BG+' FAIL '+colors.ENDC+'] ' + UUID + ' [' +colors.RED_BG+' ' + str(r.status_code) + ' '+colors.ENDC+']')
@@ -204,7 +161,45 @@ def Meta(IDlist):
 			print(UUID, file=open(f'output/Metafail.txt', 'a'))
 			Faily.append(str(UUID))
 			pass
-
+	
+def Meta(IDlist):
+	for UUID in IDlist:
+		try:
+			r = requests.post(playfabapi, headers=headers, json={'ItemId':UUID}, allow_redirects=False)
+			if r.status_code == expected_response:
+				print(' ['+colors.GREEN_BG+' HIT '+colors.ENDC+'] ' + UUID)
+				datas = r.json()["data"]["Item"]["Contents"]
+				with open(f'output/metadata/{UUID}.txt', 'a') as f:
+					json.dump(r.json(), f, indent = 4)
+					for i in datas:
+						print("\n\n" + i["Url"], file=f)
+						print(i["Url"], file=open("output/Metaurl.txt"))
+				Resultee.append(str(UUID))
+			elif r.status_code != expected_response:
+				print(' ['+colors.RED_BG+' FAIL '+colors.ENDC+'] ' + UUID + ' [' +colors.RED_BG+' ' + str(r.status_code) + ' '+colors.ENDC+']')
+				print(UUID, file=open(f'output/Metafail.txt', 'a'))
+				Faily.append(str(UUID))
+		except (Timeout, ReadTimeout, ConnectionError):
+			print(' ['+colors.RED_BG+' FAIL '+colors.ENDC+'] ' + UUID + ' [' + colors.RED_BG +' TIMEOUT '+colors.ENDC+']')
+			print(UUID, file=open(f'output/Metafail.txt', 'a'))
+			Faily.append(str(UUID))
+			pass
+		except(ChunkedEncodingError):
+			print(' ['+colors.RED_BG+' FAIL '+colors.ENDC+'] ' + UUID + ' [' + colors.RED_BG+' Invalid Length '+colors.ENDC + ']')
+			print(UUID, file=open(f'output/Metafail.txt', 'a'))
+			Faily.append(str(UUID))
+			pass
+		except(TooManyRedirects):
+			print(' ['+colors.RED_BG+' FAIL '+colors.ENDC+'] ' + UUID + ' [' +colors.RED_BG+' Redirects Loop '+colors.ENDC+']')
+			print(UUID, file=open(f'output/Metafail.txt', 'a'))
+			Faily.append(str(UUID))
+			pass
+		except(InvalidURL):
+			print(' ['+colors.RED_BG+' FAIL '+colors.ENDC+'] ' + UUID + ' [' +colors.RED_BG+' Invalid URL '+colors.ENDC+']')
+			print(UUID, file=open(f'output/Metafail.txt', 'a'))
+			Faily.append(str(UUID))
+			pass
+	
 def Mainlist():
 	print('''
       ___     
@@ -245,8 +240,7 @@ def Mainlist():
 	else:
 		exit()
 
-if __name__ == '__main__':
-	os.chdir(dirname(abspath(__file__)))
+def Checks():
 	if not os.path.exists('input'):
 		os.makedirs('input')
 	if not os.path.exists('output'):
@@ -256,4 +250,8 @@ if __name__ == '__main__':
 	if not os.path.exists('output/assets'):
 		os.makedirs('output/assets')
 	Mainlist()
+
+if __name__ == '__main__':
+	os.chdir(dirname(abspath(__file__)))
+	Checks()
     
