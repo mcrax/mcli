@@ -11,8 +11,9 @@ playfabapi = 'https://20ca2.playfabapi.com/Catalog/GetPublishedItem'
 playfab = '20ca2.playfabapi.com'
 token = 'NHxFWHdDWUxnZlBld2FhL3VGNElrZlZMMkVVTHdSeUFCNExLbWswMkVPL1ZBPXx7ImkiOiIyMDIyLTA3LTIyVDA0OjI2OjU5LjkyNzkyMzdaIiwiaWRwIjoiQ3VzdG9tIiwiZSI6IjIwMjItMDctMjNUMDQ6MjY6NTkuOTI3OTIzN1oiLCJ0aWQiOiJjYzczODk0YmJmMzc0Nzc0YmIwMDBiY2Q5YTY3ZmNkOCIsImlkaSI6Ik1DUEY2MTUzMEMzREQyMzg0NzA2Qjk4NTlCODVDREI4NzZCOCIsImgiOiIyNEI5ODFFRjA2RDczMjk5IiwiZWMiOiJtYXN0ZXJfcGxheWVyX2FjY291bnQhQjYzQTA4MDNEMzY1MzY0My82NzhFM0Y1QzZFREZCNDhBLyIsImVpIjoiNjc4RTNGNUM2RURGQjQ4QSIsImV0IjoibWFzdGVyX3BsYXllcl9hY2NvdW50In0='
 headers = { 'Host': playfab, 'Accept': '*/*', 'Accept-Encoding': 'gzip, deflate, br', 'Connection': 'Keep-Alive', 'Accept-Language': 'en-US', 'Cache-Control': 'public', 'Content-Type': 'application/json', 'User-Agent': 'cpprestsdk/2.9.0', 'x-entitytoken': token }
+gettor = {'User-Agent': 'cpprestsdk/2.9.0'}
+body = {'ItemId':UUID}
 
-expected_response = 200
 Resultee=[]
 Faily=[]
 columns = defaultdict(list)
@@ -128,75 +129,40 @@ def executor(switch):
 		print(' Failed Result : '  + colors.RED_BG + ' '+str(len(Faily)) +' '+ colors.ENDC )
 		print(' Successfull Result : ' + colors.GREEN_BG + ' '+str(len(Resultee))+ ' '+colors.ENDC)
 
-def Gettor(IDlist):
+def Engine(IDlist):
 	for UUID in IDlist:
 		try:
-			r = requests.post(UUID, headers={'User-Agent': 'cpprestsdk/2.9.0'}, allow_redirects=False)
-			if r.status_code == expected_response:
-				print(' ['+colors.GREEN_BG+' HIT '+colors.ENDC+'] ' + UUID)
-				with open(f'output/assets/{UUID}.txt', 'a') as f:
-					f.write(r.content)
-				Resultee.append(str(UUID))
-			elif r.status_code != expected_response:
-				print(' ['+colors.RED_BG+' FAIL '+colors.ENDC+'] ' + UUID + ' [' +colors.RED_BG+' ' + str(r.status_code) + ' '+colors.ENDC+']')
-				print(UUID, file=open(f'output/Metafail.txt', 'a'))
-				Faily.append(str(UUID))
-		except (Timeout, ReadTimeout, ConnectionError):
-			print(' ['+colors.RED_BG+' FAIL '+colors.ENDC+'] ' + UUID + ' [' + colors.RED_BG +' TIMEOUT '+colors.ENDC+']')
-			print(UUID, file=open(f'output/Metafail.txt', 'a'))
-			Faily.append(str(UUID))
-			pass
-		except(ChunkedEncodingError):
-			print(' ['+colors.RED_BG+' FAIL '+colors.ENDC+'] ' + UUID + ' [' + colors.RED_BG+' Invalid Length '+colors.ENDC + ']')
-			print(UUID, file=open(f'output/Metafail.txt', 'a'))
-			Faily.append(str(UUID))
-			pass
-		except(TooManyRedirects):
-			print(' ['+colors.RED_BG+' FAIL '+colors.ENDC+'] ' + UUID + ' [' +colors.RED_BG+' Redirects Loop '+colors.ENDC+']')
-			print(UUID, file=open(f'output/Metafail.txt', 'a'))
-			Faily.append(str(UUID))
-			pass
-		except(InvalidURL):
-			print(' ['+colors.RED_BG+' FAIL '+colors.ENDC+'] ' + UUID + ' [' +colors.RED_BG+' Invalid URL '+colors.ENDC+']')
-			print(UUID, file=open(f'output/Metafail.txt', 'a'))
-			Faily.append(str(UUID))
-			pass
-	
-def Meta(IDlist):
-	for UUID in IDlist:
-		try:
-			r = requests.post(playfabapi, headers=headers, json={'ItemId':UUID}, allow_redirects=False)
-			if r.status_code == expected_response:
-				print(' ['+colors.GREEN_BG+' HIT '+colors.ENDC+'] ' + UUID)
+			r = requests.post(playfabapi, headers=headers, json=body, allow_redirects=False)
+			if switch['func']=='0':
 				datas = r.json()["data"]["Item"]["Contents"]
 				with open(f'output/metadata/{UUID}.txt', 'a') as f:
 					json.dump(r.json(), f, indent = 4)
 					for i in datas:
 						print("\n\n" + i["Url"], file=f)
-						print(i["Url"], file=open("output/Metaurl.txt"))
-				Resultee.append(str(UUID))
-			elif r.status_code != expected_response:
-				print(' ['+colors.RED_BG+' FAIL '+colors.ENDC+'] ' + UUID + ' [' +colors.RED_BG+' ' + str(r.status_code) + ' '+colors.ENDC+']')
-				print(UUID, file=open(f'output/Metafail.txt', 'a'))
-				Faily.append(str(UUID))
+			else:
+				with open(f'output/assets/{UUID}.txt', 'a') as f:
+					f.write(r.content)
+			print(i["Url"], file=open(f"output/{nametag}-[Hit].txt"))
+			print(' ['+colors.GREEN_BG+' HIT '+colors.ENDC+'] ' + UUID)
+			Resultee.append(str(UUID))
 		except (Timeout, ReadTimeout, ConnectionError):
 			print(' ['+colors.RED_BG+' FAIL '+colors.ENDC+'] ' + UUID + ' [' + colors.RED_BG +' TIMEOUT '+colors.ENDC+']')
-			print(UUID, file=open(f'output/Metafail.txt', 'a'))
+			print(UUID, file=open(f'output/{nametag}-[Fail].txt', 'a'))
 			Faily.append(str(UUID))
 			pass
 		except(ChunkedEncodingError):
 			print(' ['+colors.RED_BG+' FAIL '+colors.ENDC+'] ' + UUID + ' [' + colors.RED_BG+' Invalid Length '+colors.ENDC + ']')
-			print(UUID, file=open(f'output/Metafail.txt', 'a'))
+			print(UUID, file=open(f'output/{nametag}-[Fail].txt', 'a'))
 			Faily.append(str(UUID))
 			pass
 		except(TooManyRedirects):
 			print(' ['+colors.RED_BG+' FAIL '+colors.ENDC+'] ' + UUID + ' [' +colors.RED_BG+' Redirects Loop '+colors.ENDC+']')
-			print(UUID, file=open(f'output/Metafail.txt', 'a'))
+			print(UUID, file=open(f'output/{nametag}-[Fail].txt', 'a'))
 			Faily.append(str(UUID))
 			pass
 		except(InvalidURL):
 			print(' ['+colors.RED_BG+' FAIL '+colors.ENDC+'] ' + UUID + ' [' +colors.RED_BG+' Invalid URL '+colors.ENDC+']')
-			print(UUID, file=open(f'output/Metafail.txt', 'a'))
+			print(UUID, file=open(f'output/{nametag}-[Fail].txt', 'a'))
 			Faily.append(str(UUID))
 			pass
 	
@@ -220,23 +186,42 @@ def Mainlist():
 	print('')
 
 	print('1. Marketplace Metadata')
-	print('2. Marketplace Downloader')
+	print('2. Marketplace Assets')
 	print('3. Marketplace Decryptor')
 	print('Q to Quit')
 	print('')
 	ans=input(' Choose Option: ').lower()
 	print('')
 	if str(ans)=='1':
-		switch['func']='0'
-		ICustom()
-		filet()
-		executor(switch)
-		uinput()
+		def Meta():
+			global headers, body, nametag
+			headers=headers
+			body=body
+			nametag='[Meta]'
+			switch['func']='0'
+			ICustom()
+			filet()
+			executor()
+			uinput()
+		Meta()
 	elif str(ans)=='2':
-		switch['func']='1'
-		downloader()
+		def Gettor():
+			global headers, datas, nametag
+			headers=gettor
+			body={}
+			nametag='[Assets]'
+			switch['func']='1'
+			filet()
+			downloader()
+			executor()
+			uinput()
+		Gettor()
 	elif str(ans)=='3':
-		decryptod()
+		def Unlock():
+			filet()
+			executor()
+			uinput()
+		Unlock()
 	else:
 		exit()
 
